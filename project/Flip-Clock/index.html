@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flip Clock </title>
+    <link rel="stylesheet" href="style.css">
+    <style>@import url('https://fonts.googleapis.com/css2?family=Gravitas+One&family=Heebo:wght@400;500&display=swap');
+
+        body {
+            background: url("bg/backgroundImg.jpg") no-repeat;
+            background-size: cover;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           height: 100vh;
+        
+        
+        }
+        
+        .clock {
+            display: flex;
+        }
+         
+        .flip {
+            position: relative;
+            width: 60px;
+            height: 100px;
+            margin: 2px;
+            font-size: 66px;
+            line-height: 100px;
+            text-align: center;
+            border: 1px solid black;
+            border-radius: 10px;
+            -webkit-box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+             box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+        }
+        
+        .digital::before,
+        .digital::after {
+            position: absolute;
+            content: attr(data-number);
+            left: 0;
+            right: 0;
+            color: #fff;
+            background: black;
+            overflow: hidden;
+            perspective: 160px;
+            -webkit-perspective: 160px;
+                    perspective: 160px;
+        }
+        
+        .digital::before {
+            top: 0;
+            bottom: 50%;
+            border-bottom: 1px solid #666;
+            border-radius: 10px 10px 0 0 ;
+        }
+        
+        
+        .digital::after {
+            top: 50%;
+            bottom: 0;
+            line-height: 0;
+            border-radius: 0 0 10px 10px;
+        }
+        
+         
+        
+        .digital.front::after,
+        .digital.back::before {
+            z-index: 1;
+        }
+        
+        .digital.back::after {
+            transform-origin: top center;
+            transform: rotateX(0.5turn);
+            z-index: 2;
+        }
+        
+        .digital.front::before {
+            z-index: 3;
+        }
+        
+        .divider {
+            font-size: 66px;
+            line-height: 102px;
+            font-style: normal;
+        }
+        
+        .flip.running .front::before {
+            transform-origin: center bottom;
+            animation: frontFlipDown 0.6s ease-in-out;
+            box-shadow: 0 -2px 6px rgba(255, 255, 255, 0.3);
+            backface-visibility: hidden;
+        }
+        .flip.running .back::after{
+            animation: backFlipDown 0.6s ease-in-out;
+        }
+        
+        @keyframes frontFlipDown {
+            to {
+                transform: rotateX(0.5turn);
+            }
+        }
+        
+        @keyframes backFlipDown {
+            to {
+                transform: rotateX(0); 
+            }
+        }
+        </style>
+</head>
+<body>
+    <!-- Our Clock Container -->
+    <div class="clock"> 
+        <div class="flip">
+            <div class="digital front" data-number="0"></div>
+            <div class="digital back" data-number="1"></div>
+    </div>
+    <div class="flip">
+        <div class="digital front" data-number="0"></div>
+        <div class="digital back" data-number="1"></div>
+    </div>
+    <em class="divider">:</em>
+    <div class="flip">
+        <div class="digital front" data-number="0"></div>
+        <div class="digital back" data-number="1"></div>
+    </div>
+    <div class="flip">
+        <div class="digital front" data-number="0"></div>
+        <div class="digital back" data-number="1"></div>
+    </div>
+    <em class="divider"> : </em>
+    <div class="flip">
+        <div class="digital front" data-number="0"></div>
+        <div class="digital back" data-number="1"></div>
+    </div>
+    <div class="flip">
+        <div class="digital front" data-number="0"></div>
+        <div class="digital back" data-number="1"></div>
+    </div>
+    </div>
+<script src="app.js">// Our constructor function
+    var Flipper = function() {
+        function Flipper(node, currentTime, nextTime) {
+              this.isFlipping = false;
+              this.duration = 600;
+              this.flipNode = node;
+              this.frontNode = node.querySelector(".front"); // Gets the front element
+              this.backNode = node.querySelector(".back"); // Gets the back element
+              this.setFrontTime(currentTime); // Our methods 
+              this.setBackTime(nextTime); // Method
+        }
+        
+        Flipper.prototype.setFrontTime = function (time) {
+            this.frontNode.dataset.number = time;  // fetches our data set
+        };
+            Flipper.prototype.setBackTime = function (time) {
+            this.backNode.dataset.number = time; // fetches our data set
+        };
+        Flipper.prototype.flipDown = function (currentTime, nextTime) {
+            var _this = this;
+    
+            if (this.isFlipping) {
+                return false;
+            }
+            this.isFlipping = true;
+            this.setFrontTime(currentTime);
+            this.setBackTime(nextTime);
+            this.flipNode.classList.add("running");
+            setTimeout(function() {
+                _this.flipNode.classList.remove("running");
+                _this.isFlipping = false;
+                _this.setFrontTime(nextTime);
+    
+            }, this.duration)
+        };
+        return Flipper;
+    }();
+    
+    // Constructor Ends Here
+    
+    var getTimeFromDate = function (date) {
+        return date.toTimeString().slice(0, 8).split(":").join("");
+    };
+    
+    
+    // Our Count 
+    var flips = document.querySelectorAll(".flip");
+    var now = new Date();
+    var nowTimeStr = getTimeFromDate(new Date(now.getTime() - 1000));
+    var nextTimeStr = getTimeFromDate(now);
+    var Flippers = Array.from(flips).map(function(flip, i) { // Grabs all Flips
+        return new Flipper(flip, nowTimeStr[i], nextTimeStr[i]);
+    })
+    setInterval(function() {
+        var now = new Date();
+        var nowTimeStr = getTimeFromDate(new Date(now.getTime() - 1000));
+        var nextTimeStr = getTimeFromDate(now);
+    
+        for (var i = 0; i < Flippers.length; i++) {
+            if (nowTimeStr[i] === nextTimeStr[i]){
+                continue;
+            }
+            Flippers[i].flipDown(nowTimeStr[i], nextTimeStr[i]);
+        }
+    }, 1000);
+    </script>
+</body>
+</html>
